@@ -17,5 +17,10 @@ namespace HelloAspNet.Persistence.Repositories
         {
             return await _context.Categories.ToListAsync(); // supposed to be an extension method called ToListAsync
         }
+
+        public async Task AddAsync(Category category)
+        {
+            await _context.Categories.AddAsync(category);
+        }
     }
 }

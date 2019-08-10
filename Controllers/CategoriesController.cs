@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using HelloAspNet.Domain.Models;
 using HelloAspNet.Domain.Services;
+using HelloAspNet.Extensions;
 using HelloAspNet.Resources;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,27 @@ namespace HelloAspNet.Controllers
             var categories = await _categoryService.ListAsync();
             var resources = _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryResource>>(categories);
             return resources;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostAsync([FromBody] SaveCategoryResource resource)
+        {
+            // validate
+            if (!ModelState.IsValid)
+                    return BadRequest(ModelState.GetErrorMessages());
+
+            // map resource to entity model
+            var category = _mapper.Map<SaveCategoryResource, Category>(resource);
+
+            // save to database
+            var result = await _categoryService.SaveAsync(category);
+
+            if (!result.Success)
+                    return BadRequest(result.Message);
+
+            // return created resource
+            var categoryResource = _mapper.Map<Category, CategoryResource>(result.Category);
+            return Ok(categoryResource);
         }
     }
 }

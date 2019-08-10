@@ -39,7 +39,7 @@ namespace HelloAspNet
 
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             //services.AddScoped<IProductRepository, ProductRepository>();
-            //services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICategoryService, CategoryService>();
             //services.AddScoped<IProductService, ProductService>();
 
