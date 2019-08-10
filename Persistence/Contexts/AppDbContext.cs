@@ -22,6 +22,9 @@ namespace HelloAspNet.Persistence.Contexts
             categoryTypeBuilder.Property(p => p.Id).IsRequired().ValueGeneratedOnAdd().HasValueGenerator<InMemoryIntegerValueGenerator<int>>();
             categoryTypeBuilder.Property(p => p.Name).IsRequired().HasMaxLength(50);
             categoryTypeBuilder.HasMany(p => p.Products).WithOne(p => p.Category).HasForeignKey(p => p.CategoryId);
+            
+            // NOTE: In-memory provider doesn't enforce this - see https://github.com/aspnet/EntityFrameworkCore/issues/3850
+            categoryTypeBuilder.HasIndex(p => p.Name).IsUnique().HasName("UK_Categories_Name");
 
             categoryTypeBuilder.HasData
             (
