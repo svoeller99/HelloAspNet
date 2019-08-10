@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using HelloAspNet.Domain.Models;
 using HelloAspNet.Domain.Services;
+using HelloAspNet.Domain.Services.Communication;
 using HelloAspNet.Extensions;
 using HelloAspNet.Resources;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +43,21 @@ namespace HelloAspNet.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] SaveCategoryResource resource)
         {
+            return await SaveAsync(resource, (category) => {
+                return _categoryService.SaveAsync(category);
+            });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAsync(int id, [FromBody] SaveCategoryResource resource)
+        {
+            return await SaveAsync(resource, (category) => {
+                return _categoryService.UpdateAsync(id, category);
+            });
+        }
+
+        private async Task<IActionResult> SaveAsync(SaveCategoryResource resource, Func<Category, Task<CategoryResponse>> saveFunction)
+        {
             // validate
             if (!ModelState.IsValid)
                     return BadRequest(ModelState.GetErrorMessages());
@@ -49,30 +66,12 @@ namespace HelloAspNet.Controllers
             var category = _mapper.Map<SaveCategoryResource, Category>(resource);
 
             // save to database
-            var result = await _categoryService.SaveAsync(category);
+            var result = await saveFunction.Invoke(category);
 
             if (!result.Success)
                     return BadRequest(result.Message);
 
             // return created resource
-            var categoryResource = _mapper.Map<Category, CategoryResource>(result.Category);
-            return Ok(categoryResource);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] SaveCategoryResource resource)
-        {
-            // TODO: consolidate code duplication with PostAsync (only differs by what service method is called)
-
-            if (!ModelState.IsValid)
-                    return BadRequest(ModelState.GetErrorMessages());
-
-            var category = _mapper.Map<SaveCategoryResource, Category>(resource);
-            var result = await _categoryService.UpdateAsync(id, category);
-
-            if (!result.Success)
-                    return BadRequest(result.Message);
-            
             var categoryResource = _mapper.Map<Category, CategoryResource>(result.Category);
             return Ok(categoryResource);
         }
